@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher's Smart Book</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .student-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input { padding: 8px; font-size: 16px; }
+    button { padding: 8px 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>My Mark Book</h1>
+
+  <h2>Add New Student</h2>
+  <input type="text" id="studentName" placeholder="Enter student's name">
+  <button onclick="addStudent()">Add Student</button>
+
+  <hr style="margin: 30px 0;">
+
+  <h2>Student List</h2>
+  <div id="student-list">
+    </div>
+
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // =================================================================
+    // 1. PASTE YOUR `firebaseConfig` OBJECT FROM FIREBASE HERE
+    // =================================================================
+    const firebaseConfig = {// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBloQ7ek2Kc88JPCezGJPtTR3pRaIQcMCk",
+  authDomain: "markbook-app-2025.firebaseapp.com",
+  projectId: "markbook-app-2025",
+  storageBucket: "markbook-app-2025.firebasestorage.app",
+  messagingSenderId: "910980584345",
+  appId: "1:910980584345:web:07d7ab8ee47bfb109bb908"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+      apiKey: "PASTE YOUR KEY HERE",
+      authDomain: "PASTE YOUR DOMAIN HERE",
+      projectId: "PASTE YOUR PROJECT ID HERE",
+      storageBucket: "PASTE YOUR BUCKET HERE",
+      messagingSenderId: "PASTE YOUR SENDER ID HERE",
+      appId: "PASTE YOUR APP ID HERE"
+    };
+    // =================================================================
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    console.log("Firebase Connection Successful!");
+
+    // --- FUNCTION TO ADD A STUDENT ---
+    function addStudent() {
+      const nameInput = document.getElementById('studentName');
+      const studentName = nameInput.value;
+      if (studentName.trim() === '') {
+        alert('Please enter a student name.');
+        return;
+      }
+      db.collection("students").add({
+        name: studentName,
+        status: "present",
+        timestamp: new Date()
+      }).then(() => {
+        nameInput.value = '';
+      }).catch((error) => {
+        console.error("Error adding student: ", error);
+      });
+    }
+
+    // --- FUNCTION TO DELETE A STUDENT ---
+    function deleteStudent(id) {
+      if (confirm("Are you sure?")) {
+        db.collection("students").doc(id).delete();
+      }
+    }
+
+    // --- REAL-TIME LISTENER TO DISPLAY STUDENTS ---
+    db.collection("students").orderBy("timestamp", "asc").onSnapshot((snapshot) => {
+      const studentList = document.getElementById('student-list');
+      studentList.innerHTML = '';
+      snapshot.forEach((doc) => {
+        const student = doc.data();
+        const id = doc.id;
+        const card = `
+          <div class="student-card">
+            <span>${student.name}</span>
+            <button onclick="deleteStudent('${id}')">Delete</button>
+          </div>
+        `;
+        studentList.innerHTML += card;
+      });
+    });
+  </script>
+  </body>
+</html>
